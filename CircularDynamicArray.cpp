@@ -64,13 +64,8 @@ public:
         }
     }
 
-    
-
-    void addFront(elmtype v){
-        //cout << "addFront() called" << endl;
-        if(size == capacity){
-            capacity = capacity * 2;
-            if(!isReversed){
+    void resizeArray(){
+        if(!isReversed){
                 elmtype* newCDA = new elmtype[capacity];
                 for(int i = 0; i< size;i++){
                     newCDA[i] = CDArray[(front + i + size) % size];
@@ -83,6 +78,13 @@ public:
             else{
 
             }
+    }
+
+    void addFront(elmtype v){
+        //cout << "addFront() called" << endl;
+        if(size == capacity){
+            capacity = capacity * 2;
+            resizeArray();
         
         }
         CDArray[(front - 1 + capacity) % capacity] = v;
@@ -94,19 +96,7 @@ public:
     void addEnd(int v){
         if(size == capacity){
             capacity = capacity * 2;
-            if(!isReversed){
-                elmtype* newCDA = new elmtype[capacity];
-                for(int i = 0; i< size;i++){
-                    newCDA[i] = CDArray[(front + i + size) % size];
-                }
-                delete []CDArray;
-                CDArray = newCDA;
-                front = 0;
-                back = size - 1;
-            }
-            else{
-
-            }
+            resizeArray();
         
         }
         CDArray[(back + 1 + capacity) % capacity] = v;
@@ -122,21 +112,12 @@ public:
         }
         if(((float)size)/((float)capacity) == .25){
             capacity = capacity / 2;
-            if(!isReversed){
-                elmtype* newCDA = new elmtype[capacity];
-                for(int i = 0; i< size;i++){
-                    newCDA[i] = CDArray[(front + i + size) % size];
-                }
-                delete []CDArray;
-                CDArray = newCDA;
-                front = 0;
-                back = size - 1;
-            }
+            resizeArray();
         }
     }
 
     void delFront(){
-        if(!isreversed){
+        if(!isReversed){
 
         }
     }
