@@ -12,6 +12,7 @@ private:
     int back;
     bool isReversed;
     elmtype* CDArray;
+    elmtype error;
 public:
     
     CircularDynamicArray(){
@@ -33,30 +34,31 @@ public:
 
     CircularDynamicArray(const CircularDynamicArray &old){
         //delete []CDArray;
-        elmtype* new_CDArray = new elmtype[old.capacity];
-        for(int i = 0; i< old.size;i++){
-                operator[](i)= old.CDArray[(front + i + capacity) % capacity];
-            }
         front = old.front;
         back = old.back;
         size = old.size;
         isReversed = old.isReversed;
         capacity = old.capacity;
+        CDArray = new elmtype[capacity];
+        for(int i = 0; i< old.size;i++){
+                CDArray[(front + i + capacity) % capacity] = old.CDArray[(front + i + capacity) % capacity];
+            }
     }
 
     CircularDynamicArray& operator=(const CircularDynamicArray& old){
         if(this != &old){
-            elmtype* new_CDArray = new elmtype[old.capacity];
-            for(int i = 0; i< old.size;i++){
-                operator[](i)= old.CDArray[(front + i + capacity) % capacity];
-            }
+            delete[] CDArray;
             front = old.front;
             back = old.back;
             size = old.size;
             isReversed = old.isReversed;
             capacity = old.capacity;
+            CDArray = new elmtype[capacity];
+            for(int i = 0; i< size;i++){
+                CDArray[(front + i + capacity) % capacity]= old.CDArray[(front + i + capacity) % capacity];
+            }
         }
-        //return *this;
+        return *this;
     }
 
     ~CircularDynamicArray(){
@@ -64,8 +66,9 @@ public:
     };
 
     elmtype& operator[](int i){
-        if (i > ((back - front + capacity) % capacity)){
+        if (i > (size)){
             cout << "Index out of bounds" << endl;
+            return error;
         }
         else{
             return *(CDArray + ((front + i + capacity)%capacity));
@@ -74,14 +77,34 @@ public:
 
     void resizeArray(){
         if(!isReversed){
-                elmtype* newCDA = new elmtype[capacity];
+                elmtype* newCDA = new elmtype[capacity * 2];
                 for(int i = 0; i< size;i++){
-                    newCDA[i] = CDArray[(front + i + capacity) % capacity];
+                    // newCDA[i] = CDArray[(front + i + capacity) % capacity];
+                    newCDA[i] = operator[](i);
                 }
                 delete []CDArray;
                 CDArray = newCDA;
                 front = 0;
                 back = size - 1;
+                capacity *= 2;
+            }
+            else{
+
+            }
+    }
+
+    void downsizeArray(){
+        if(!isReversed){
+                elmtype* newCDA = new elmtype[capacity / 2];
+                for(int i = 0; i< size;i++){
+                    // newCDA[i] = CDArray[(front + i + capacity) % capacity];
+                    newCDA[i] = operator[](i);
+                }
+                delete []CDArray;
+                CDArray = newCDA;
+                front = 0;
+                back = size - 1;
+                capacity /= 2;
             }
             else{
 
@@ -91,7 +114,6 @@ public:
     void addFront(elmtype v){
         //cout << "addFront() called" << endl;
         if(size == capacity){
-            capacity = capacity * 2;
             resizeArray();
         
         }
@@ -104,7 +126,6 @@ public:
 
     void addEnd(int v){
         if(size == capacity){
-            capacity = capacity * 2;
             resizeArray();
         
         }
@@ -121,8 +142,7 @@ public:
             size = size - 1;
         }
         if(((float)size)/((float)capacity) == .25){
-            capacity = capacity / 2;
-            resizeArray();
+            downsizeArray();
         }
     }
 
@@ -132,8 +152,7 @@ public:
             size = size - 1;
         }
         if(((float)size)/((float)capacity) == .25){
-            capacity = capacity / 2;
-            resizeArray();
+            downsizeArray();
         }
     }
 
