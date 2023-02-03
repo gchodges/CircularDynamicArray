@@ -33,7 +33,10 @@ public:
 
     CircularDynamicArray(const CircularDynamicArray &old){
         //delete []CDArray;
-        CDArray = old.CDArray;
+        elmtype* new_CDArray = new elmtype[old.capacity];
+        for(int i = 0; i< old.size;i++){
+                operator[](i)= old.CDArray[(front + i + capacity) % capacity];
+            }
         front = old.front;
         back = old.back;
         size = old.size;
@@ -42,17 +45,22 @@ public:
     }
 
     CircularDynamicArray& operator=(const CircularDynamicArray& old){
-        CDArray = old.CDArray;
-        front = old.front;
-        back = old.back;
-        size = old.size;
-        isReversed = old.isReversed;
-        capacity = old.capacity;
-        return *this;
+        if(this != &old){
+            elmtype* new_CDArray = new elmtype[old.capacity];
+            for(int i = 0; i< old.size;i++){
+                operator[](i)= old.CDArray[(front + i + capacity) % capacity];
+            }
+            front = old.front;
+            back = old.back;
+            size = old.size;
+            isReversed = old.isReversed;
+            capacity = old.capacity;
+        }
+        //return *this;
     }
 
     ~CircularDynamicArray(){
-        //delete []CDArray;
+        delete []CDArray;
     };
 
     elmtype& operator[](int i){
@@ -68,7 +76,7 @@ public:
         if(!isReversed){
                 elmtype* newCDA = new elmtype[capacity];
                 for(int i = 0; i< size;i++){
-                    newCDA[i] = CDArray[(front + i + size) % size];
+                    newCDA[i] = CDArray[(front + i + capacity) % capacity];
                 }
                 delete []CDArray;
                 CDArray = newCDA;
@@ -87,7 +95,8 @@ public:
             resizeArray();
         
         }
-        CDArray[(front - 1 + capacity) % capacity] = v;
+        // CDArray[(front - 1 + capacity) % capacity] = v;
+        operator[](front - 1) = v;
         front = (front - 1 + capacity) % capacity;
         size++;
         back = (front + size - 1 + capacity) % capacity;
@@ -99,7 +108,8 @@ public:
             resizeArray();
         
         }
-        CDArray[(back + 1 + capacity) % capacity] = v;
+        // CDArray[(back + 1 + capacity) % capacity] = v;
+        operator[](back+1) = v;
         back = (back + 1 + capacity) % capacity;
         size++;
         front = (back - size + 1 + capacity) % capacity;
@@ -107,7 +117,7 @@ public:
 
     void delEnd(){
         if(!isReversed){
-            back = back - 1;
+            back = (back - 1 + capacity) % capacity;
             size = size - 1;
         }
         if(((float)size)/((float)capacity) == .25){
@@ -118,7 +128,12 @@ public:
 
     void delFront(){
         if(!isReversed){
-
+            front = (front + 1 + capacity) % capacity;
+            size = size - 1;
+        }
+        if(((float)size)/((float)capacity) == .25){
+            capacity = capacity / 2;
+            resizeArray();
         }
     }
 

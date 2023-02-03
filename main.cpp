@@ -20,7 +20,9 @@ int main(){
     printint(myCDArray);
 
     for(int i = 0;i<15;i++){
-        myCDArray.delEnd();
+        if(i % 2 == 1)
+         myCDArray.delFront();
+        else myCDArray.delEnd();
         cout << myCDArray.getCapacity() << endl;
         printint(myCDArray);
     }
