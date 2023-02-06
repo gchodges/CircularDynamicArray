@@ -33,7 +33,6 @@ public:
     };
 
     CircularDynamicArray(const CircularDynamicArray &old){
-        //delete []CDArray;
         front = old.front;
         back = old.back;
         size = old.size;
@@ -75,6 +74,11 @@ public:
         }
     }
 
+
+    /*
+    This method creates a new array of double the capacity of the current CDArray and 
+    copies the contents of the old array to indices 0-(size - 1);
+    */
     void resizeArray(){
         if(!isReversed){
                 elmtype* newCDA = new elmtype[capacity * 2];
@@ -92,6 +96,11 @@ public:
 
             }
     }
+
+    /*
+    This method creates a new array of half the capacity of the current CDArray and 
+    copies the contents of the old array to indices 0-(size - 1);
+    */
 
     void downsizeArray(){
         if(!isReversed){
@@ -111,30 +120,42 @@ public:
             }
     }
 
+    /*
+    This method adds a new element to the front of the circular dynamic array, resizing if necessary.
+    */
+
     void addFront(elmtype v){
         //cout << "addFront() called" << endl;
         if(size == capacity){
             resizeArray();
         
         }
-        // CDArray[(front - 1 + capacity) % capacity] = v;
+        // CDArray[(front - 1 + capacity) % capacity] = v;       // I prefer the cleaner use of the operator[](int i)
         operator[](front - 1) = v;
         front = (front - 1 + capacity) % capacity;
         size++;
         back = (front + size - 1 + capacity) % capacity;
     }
 
+    /*
+    This method adds a new element to the end of the circular dynamic array, resizing if necessary.
+    */
+
     void addEnd(int v){
         if(size == capacity){
             resizeArray();
         
         }
-        // CDArray[(back + 1 + capacity) % capacity] = v;
+        // CDArray[(back + 1 + capacity) % capacity] = v;       // I prefer the cleaner use of the operator[](int i)
         operator[](back+1) = v;
         back = (back + 1 + capacity) % capacity;
         size++;
         front = (back - size + 1 + capacity) % capacity;
     }
+
+    /*
+    This method 'deletes' the last element in the array by decreasing array size and decreasing the back index by one.
+    */
 
     void delEnd(){
         if(!isReversed){
@@ -146,6 +167,10 @@ public:
         }
     }
 
+    /*
+    This method 'deletes' the first element in the array by decreasing array size and increasing the front index by one.
+    */
+
     void delFront(){
         if(!isReversed){
             front = (front + 1 + capacity) % capacity;
@@ -156,11 +181,13 @@ public:
         }
     }
 
-    int getCapacity(){
+    //Getters below
+
+    int capacity(){
         return capacity;
     }
 
-    int getSize(){
+    int length(){
         return size;
     }
 };

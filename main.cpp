@@ -5,7 +5,7 @@ using namespace std;
 
 void printint(CircularDynamicArray<int> cdarray){
     cout << "Print Called" << endl;
-    for(int i = 0; i<cdarray.getSize();i++){
+    for(int i = 0; i<cdarray.length();i++){
         cout << "i = " << i << ": "<<  cdarray[i] << endl;
     }
     cout << endl;
