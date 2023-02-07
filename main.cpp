@@ -14,29 +14,43 @@ void printint(CircularDynamicArray<int> cdarray){
 int main(){
     CircularDynamicArray<int> myCDArray;
 
+    //srand((unsigned)time(NULL));
+
+
     for(int i = 0;i<15;i++){
         myCDArray.addEnd(i);
     }
     printint(myCDArray);
+    myCDArray.reverse();
+    printint(myCDArray);
+    myCDArray.delEnd();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    myCDArray.delFront();
+    printint(myCDArray);
+    
 
-    // for(int i = 0;i<15;i++){
-    //     //if(i % 2 == 1)
-         myCDArray.delFront();
-         myCDArray.delEnd();
-         myCDArray.delFront();
-         myCDArray.delEnd();
-         myCDArray.delFront();
-         myCDArray.delEnd();
-         myCDArray.delFront();
-         myCDArray.delEnd();
-         myCDArray.delFront();
-         myCDArray.delEnd();
-        //  myCDArray.delFront();
-         myCDArray.delEnd();       
 
-    //     cout << myCDArray.getCapacity() << endl;
-        printint(myCDArray);
-    // }
+    cout << myCDArray.binarySearch(12) << endl;
 
     cout << "myCDArray[5] = " << myCDArray[5] << endl;
 
