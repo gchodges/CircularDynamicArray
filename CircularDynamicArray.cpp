@@ -52,24 +52,138 @@ private:
                 isReversed = false;
     }
 
+    /*
+    This is the standard mergesort algorithm. It breaks down the array into partitions until the are Size one arrays.
+    It then calls the merge function, which iterates through each subarray, combining them in order into a larger subarray, 
+    which recurses until the beginning pointer crosses the end.
+    */
+    
+    void mergeSort(int const begin, int const end){
+        //if pointers cross the array is sorted
+        if (begin >= end){
+            return;
+        }
+
+        int mid = begin + (end - begin) / 2;
+        mergeSort(begin,mid);
+        mergeSort(mid + 1,end);
+        merge(begin, mid, end);
+    }
+
+    void merge(int const begin, int const mid, int const end){
+        int const leftSubSize = (mid - begin + 1);
+        int const rightSubSize = end - mid;
+
+        elmtype* leftSub = new elmtype[leftSubSize];
+        elmtype* rightSub = new elmtype[rightSubSize];
+
+        //put all elements into their respective subarrays
+        for(int i = 0; i<leftSubSize;i++){
+            leftSub[i] = operator[](begin + i);
+        }
+        for(int j = 0; j<rightSubSize;j++){
+            rightSub[j] = operator[](mid + 1 + j);
+        }
+
+        int currLeftInd = 0;
+        int currRightInd = 0;
+        int currMergedInd = begin;
+
+        //Merge the subarrays, preserving stability and sorting in the process
+        while(currLeftInd < leftSubSize && currRightInd < rightSubSize){
+            if(leftSub[currLeftInd] < rightSub[currRightInd]){
+                operator[](currMergedInd) = leftSub[currLeftInd];
+                currLeftInd++;
+            }
+            else{
+                operator[](currMergedInd) = rightSub[currRightInd];
+                currRightInd++;
+            }
+            currMergedInd++;
+        }
+        //If either subarray is empty, fill the rest of the merged array with the other
+        while(currLeftInd < leftSubSize){
+            operator[](currMergedInd) = leftSub[currLeftInd];
+            currLeftInd++;
+            currMergedInd++;
+        }
+        while(currRightInd < rightSubSize){
+            operator[](currMergedInd) = rightSub[currRightInd];
+            currRightInd++;
+            currMergedInd++;
+        }
+        delete[] leftSub;
+        delete[] rightSub;
+    }
+
+    /*
+    This uses the quick select algorithm discussed in the class slides.
+    */
+
+    elmtype quickSelectAlgo(CircularDynamicArray <elmtype> array, int k){
+        
+        //Seeds the random number generator to ensure a more random number
+        srand((unsigned)time(NULL));
+        //Generates a random number
+        int random = rand();
+        //Turns the random number into an array index and generates the pivot value from the random pivot index
+        int pivotIndex = (random % (array.length()));
+        elmtype pivot = array[pivotIndex];
+        //Create three lists to store the values less than, equal to, and greater than the pivot
+        CircularDynamicArray <elmtype> less, equal, greater;
+        //Populate the elements of the partition to their proper arrays
+        for(int i = 0;i < array.length();i++){
+            if(array[i] < pivot)
+                less.addEnd(array[i]);
+            else if(pivot == array[i])
+                equal.addEnd(array[i]);
+            else 
+                greater.addEnd(array[i]);
+        }
+        //Determine whether the kth value is this value, is in the lesser partition, or is in the greater than partition
+        if(k <= less.length())
+            //if in the lesser partition, run quick select on the left partition, searching for the kth element 
+            return quickSelectAlgo(less, k);
+        else if(k <= equal.length() + less.length())
+            return pivot;
+        else
+            //if in the greater partition, run quick select on the greater partition searching for the (k - number of lesser values - number of equal values)th
+            //value
+            return quickSelectAlgo(greater, k - less.length() - equal.length());
+    }
+
 public:
+
+    /*
+    Default constructor
+    */
     
     CircularDynamicArray(){
         CDArray = new elmtype[2];
         size = 0;
         cap = 2;
-        front = back = -1;
+        front = -1;
+        back = -1;
         isReversed = false;
     };
+
+    /*
+    Constructor that more or less acts as a standard array with dynamic array abilities. The user can instantly
+    access all indices in the capacity of the array, but the size can increase.
+    */
 
     CircularDynamicArray(int s){
         CDArray = new elmtype[s];
         size = s;
         cap = s;
         front = 0;
-        back = s;
+        back = s - 1;
         isReversed = false;
     };
+
+    /*
+    Copy Constructor
+    */
 
     CircularDynamicArray(const CircularDynamicArray &old){
         front = old.front;
@@ -82,6 +196,10 @@ public:
                 CDArray[(front + i + cap) % cap] = old.CDArray[(front + i + cap) % cap];
             }
     }
+
+    /*
+    Copy assignment operator
+    */
 
     CircularDynamicArray& operator=(const CircularDynamicArray& old){
         if(this != &old){
@@ -99,52 +217,114 @@ public:
         return *this;
     }
 
+    /*
+    Destructor
+    */
+
     ~CircularDynamicArray(){
         delete []CDArray;
     };
 
+    /*
+    Bracket operator. The user can access any index in the array from the user perspective. For example, if the array currently had a back index of 
+    7  and a front index of 10 with capacity 16, CDA[2] = memberArray[12]. I handle the reversal of the array mostly through the use of this operator.
+    This allows me to write less code for most other methods in the class as they can be used both reversed and not reversed.
+    */
+
     elmtype& operator[](int i){
-        if (i > (size)){
+        if ((i >= (size)) || (i < 0)){
             cout << "Index out of bounds" << endl;
             return error;
         }
         else{
+            //cout << "inserting at index: " << (front + i + cap) % cap << endl;
             if(isReversed == true) return *(CDArray + ((back - i + cap) % cap));
-            else return *(CDArray + ((front + i + cap) % cap));
+            else return CDArray[((front + i + cap) % cap)];
         }
     }
+
 
     /*
     This method adds a new element to the front of the circular dynamic array, resizing if necessary.
     */
 
     void addFront(elmtype v){
-        //cout << "addFront() called" << endl;
         if(size == cap){
+            //calls my method to double the size of the array
             resizeArray();
         
         }
         // CDArray[(front - 1 + cap) % cap] = v;       // I prefer the cleaner use of the operator[](int i)
-        operator[](front - 1) = v;
-        front = (front - 1 + cap) % cap;
-        size++;
-        back = (front + size - 1 + cap) % cap;
+        if(!isReversed){
+            //I declare my arrays with front and back at -1 to help with adding the first element and setting front and back to the correct values.
+            if(front == -1){
+                CDArray[0] = v;
+                front = 0;
+                back = 0;
+                size++;
+            }
+            else{
+                // operator[](cap - 1) = v;                 // Not sure why this didn't work? Should have worked the same way as below
+                CDArray[(front + cap - 1 ) % cap] = v;
+                size++;
+                front = (front - 1 + cap) % cap;
+            }
+        }
+        else{
+            if(front == -1){
+                CDArray[0] = v;
+                front = 0;
+                back = 0;
+                size++;
+            }
+            else{
+                // operator[](cap - 1) = v;                 // Not sure why this didn't work? Should have worked the same way as below
+                CDArray[(back + 1 + cap) % cap] = v;
+                size++;
+                back = (back + 1 + cap) % cap;
+            }
+        }
     }
 
     /*
     This method adds a new element to the end of the circular dynamic array, resizing if necessary.
     */
 
-    void addEnd(int v){
+    void addEnd(elmtype v){
         if(size == cap){
             resizeArray();
         
         }
         // CDArray[(back + 1 + cap) % cap] = v;       // I prefer the cleaner use of the operator[](int i)
-        operator[](back+1) = v;
-        back = (back + 1 + cap) % cap;
-        size++;
-        front = (back - size + 1 + cap) % cap;
+        //cout << "back + 1 = " << back + 1 << endl;
+        if(!isReversed){
+            if(front==-1){
+                CDArray[0] = v;
+                front = 0;
+                back = 0;
+                size++;
+            }
+            else{
+                // operator[](back+1) = v;
+                CDArray[(back + 1 + cap) % cap] = v;
+                back = (back + 1 + cap) % cap;
+                size++;
+            }
+        }
+        else{
+            if(front == -1){
+                CDArray[0] = v;
+                front = 0;
+                back = 0;
+                size++;
+            }
+            else{
+                // operator[](cap - 1) = v;                 // Not sure why this didn't work? Should have worked the same way as below
+                CDArray[(front + cap - 1) % cap] = v;
+                size++;
+                front = (front - 1 + cap) % cap;
+            }
+        }
     }
 
     /*
@@ -161,6 +341,7 @@ public:
             size--;
         }
         if(((float)size)/((float)cap) == .25){
+            //downsizeArray halves the array at a quarter full
             downsizeArray();
         }
     }
@@ -214,7 +395,7 @@ public:
     it returns -1. Assumes the array is already sorted in ascending order.
     */
 
-    int binarySearch(elmtype e){
+    int binSearch(elmtype e){
         int l = 0;
         int r = size - 1;
         int mid;
@@ -230,7 +411,7 @@ public:
     }
 
     /*
-    This method flips the isReversed boolean, thus changing how other functions 'see' the array.
+    This method flips the isReversed boolean, thus changing how other functions 'see' the array. This is seen by my bracket operator, which handles most of the trouble.
     */
 
    void reverse(){
@@ -242,10 +423,39 @@ public:
     }
    }
 
+   /*
+   This method uses the merge sort algorithm to sort the circular dynamic array. Merge sort was chosen as it is both a stable sorting algorithm and
+   it has a time complexity of O(nlgn).
+   */
+    void stableSort(){
+        mergeSort(0, size - 1);
+    }
+
+    /*
+    This method returns the kth smallest element in the array using the quickselect algorithm in O(size) time complexity
+    */
+
+    elmtype QuickSelect(int k){
+        CircularDynamicArray <elmtype> arr;
+        for(int i = 0;i<size;i++){
+            arr.addEnd(operator[](i));
+        }
+        return quickSelectAlgo(arr, k);
+    }
+
     //Getters below
 
     int capacity(){
         return cap;
+    }
+
+    int getFront(){
+        return front;
+    }
+
+    int getEnd(){
+
+        return back;
     }
 
     int length(){
